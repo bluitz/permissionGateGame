@@ -39,6 +39,11 @@ export function useShift() {
     setStatus("won");
   }
 
+  /** For shifts with their own losing condition (the boss timer). */
+  function fail() {
+    setStatus("failed");
+  }
+
   function restart() {
     setLives(MAX_LIVES);
     setScore(0);
@@ -47,7 +52,7 @@ export function useShift() {
     setStatus("playing");
   }
 
-  return { lives, score, audit, incident, status, log, raise, dismissIncident, addScore, win, restart };
+  return { lives, score, audit, incident, status, log, raise, dismissIncident, addScore, win, fail, restart };
 }
 
 export type Shift = ReturnType<typeof useShift>;

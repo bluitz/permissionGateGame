@@ -7,9 +7,12 @@ import { RopeBoard } from "./levels/rope/Board";
 import { PkceBoard } from "./levels/pkce/Board";
 import { VillainsBoard } from "./levels/villains/Board";
 import { ClosetBoard } from "./levels/closet/Board";
+import { ZoningBoard } from "./levels/zoning/Board";
+import { BossBoard } from "./levels/boss/Board";
 
 export function App() {
-  const [current, setCurrent] = useState<ShiftId | null>(null);
+  // #gate, #rope, etc. open a shift directly, so a link can point at one
+  const [current, setCurrent] = useState<ShiftId | null>(() => (SHIFTS.find((s) => "#" + s.id === location.hash)?.id ?? null));
   const [completed, setCompleted] = useState<ShiftId[]>(loadCompleted);
 
   const info = SHIFTS.find((s) => s.id === current);
@@ -32,19 +35,10 @@ function Board({ info, onQuit, onWon }: { info: ShiftInfo; onQuit: () => void; o
     case "pkce": return <PkceBoard info={info} onQuit={onQuit} onWon={onWon} />;
     case "villains": return <VillainsBoard info={info} onQuit={onQuit} onWon={onWon} />;
     case "closet": return <ClosetBoard info={info} onQuit={onQuit} onWon={onWon} />;
+    case "zoning": return <ZoningBoard info={info} onQuit={onQuit} onWon={onWon} />;
+    case "boss": return <BossBoard info={info} onQuit={onQuit} onWon={onWon} />;
     case "gate": return <GateBoard info={info} onQuit={onQuit} onWon={onWon} />;
-    default: return <ComingSoon info={info} onQuit={onQuit} />;
   }
-}
-
-function ComingSoon({ info, onQuit }: { info: ShiftInfo; onQuit: () => void }) {
-  return (
-    <div className="menu">
-      <h2>{info.emoji} {info.name}</h2>
-      <p>This shift is still being built.</p>
-      <button className="btn" onClick={onQuit}>Back</button>
-    </div>
-  );
 }
 
 function Menu({ completed, onPick }: { completed: ShiftId[]; onPick: (id: ShiftId) => void }) {
