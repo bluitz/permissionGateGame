@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Sequencer } from "../../engine/Sequencer";
 import { ShiftFrame } from "../../engine/Shift";
 import { useQueue } from "../../engine/useQueue";
 import { useShift } from "../../engine/useShift";
@@ -20,10 +21,6 @@ const STALL: Incident = {
   },
 };
 
-function shuffle<T>(xs: T[]): T[] {
-  return [...xs].sort(() => Math.random() - 0.5);
-}
-
 export function GateBoard({ info, onQuit, onWon }: { info: ShiftInfo; onQuit: () => void; onWon: () => void }) {
   const shift = useShift();
   const [phase, setPhase] = useState<"build" | "run">("build");
@@ -38,28 +35,10 @@ export function GateBoard({ info, onQuit, onWon }: { info: ShiftInfo; onQuit: ()
   );
 }
 
-/** Phase A: put the eight layers in precedence order. Click a tile, then click a slot. */
+/** Phase A: put the eight layers in precedence order. */
 function BuildPhase({ shift, onBuilt }: { shift: ReturnType<typeof useShift>; onBuilt: () => void }) {
-  const [tray, setTray] = useState<LayerId[]>(() => shuffle(ORDER));
-  const [slots, setSlots] = useState<(LayerId | null)[]>(Array(ORDER.length).fill(null));
-  const [held, setHeld] = useState<LayerId | null>(null);
-
-  function place(i: number) {
-    if (!held) {
-      const back = slots[i];
-      if (!back) return;
-      setSlots(slots.map((s, j) => (j === i ? null : s))); // pick a placed tile back up into the tray
-      setTray([...tray, back]);
-      return;
-    }
-    const evicted = slots[i];
-    setSlots(slots.map((s, j) => (j === i ? held : s)));
-    setTray([...tray.filter((t) => t !== held), ...(evicted ? [evicted] : [])]);
-    setHeld(null);
-  }
-
-  function check() {
-    const result = checkOrder(slots);
+  function check(order: (string | null)[]) {
+    const result = checkOrder(order as (LayerId | null)[]);
     if (result.ok) {
       shift.log({ who: "gatekeeper", what: "assembled the gate", why: "managed → deny → hook → allow → sandbox → mode → classifier → human" });
       onBuilt();
@@ -67,27 +46,11 @@ function BuildPhase({ shift, onBuilt }: { shift: ReturnType<typeof useShift>; on
       shift.raise(result.incident, { who: "gatekeeper", what: "assembled the gate wrong", why: result.incident.title });
     }
   }
-
   return (
     <div>
       <h2>Phase A: build the gate</h2>
       <p className="muted">Eight layers, one order. Click a tile, then a slot. Tool calls will enter at slot 1 and stop at the first layer that decides.</p>
-      <div className="slots">
-        {slots.map((s, i) => (
-          <button key={i} className={"slot" + (s ? " slot-filled" : "") + (held ? " slot-target" : "")} onClick={() => place(i)}>
-            <div className="slot-num">{i + 1}</div>
-            {s ? <LayerTile id={s} /> : <div className="slot-empty">empty</div>}
-          </button>
-        ))}
-      </div>
-      <div className="tray">
-        {tray.map((id) => (
-          <button key={id} className={"tile-btn" + (held === id ? " tile-held" : "")} onClick={() => setHeld(held === id ? null : id)}>
-            <LayerTile id={id} />
-          </button>
-        ))}
-      </div>
-      <button className="btn" onClick={check}>Check the gate</button>
+      <Sequencer items={ORDER.map((id) => ({ id, render: <LayerTile id={id} /> }))} slotCount={ORDER.length} columns={4} onCheck={check} checkLabel="Check the gate" />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { SHIFTS, type ShiftId, type ShiftInfo } from "./engine/types";
 import { CAST } from "./cast";
 import { GateBoard } from "./levels/gate/Board";
 import { RopeBoard } from "./levels/rope/Board";
+import { PkceBoard } from "./levels/pkce/Board";
 
 export function App() {
   const [current, setCurrent] = useState<ShiftId | null>(null);
@@ -26,6 +27,7 @@ export function App() {
 function Board({ info, onQuit, onWon }: { info: ShiftInfo; onQuit: () => void; onWon: () => void }) {
   switch (info.id) {
     case "rope": return <RopeBoard info={info} onQuit={onQuit} onWon={onWon} />;
+    case "pkce": return <PkceBoard info={info} onQuit={onQuit} onWon={onWon} />;
     case "gate": return <GateBoard info={info} onQuit={onQuit} onWon={onWon} />;
     default: return <ComingSoon info={info} onQuit={onQuit} />;
   }

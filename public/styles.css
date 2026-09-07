@@ -103,3 +103,9 @@ p { margin: 6px 0; line-height: 1.45; }
 .evidence { margin: 10px 0; font-size: 14px; }
 .evidence > div { padding: 4px 8px; border-left: 3px solid transparent; }
 .evidence-now { border-left-color: var(--accent) !important; background: var(--panel2); }
+
+/* choices */
+.choice { background: var(--panel); border: 2px solid var(--blue); border-radius: 10px; padding: 14px; margin: 14px 0; animation: slidein 0.4s; }
+.choice-prompt { font-size: 16px; font-weight: 700; }
+.choice-options { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px; }
+.step-text { font-size: 12px; }
